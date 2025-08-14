@@ -16,36 +16,24 @@
             color: #4b5563;
             overflow: hidden;
             touch-action: none;
+            margin: 0;
+            padding: 0;
         }
-        #game-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100vh;
-        }
+        /* The game container now takes up the full screen */
         #game-container {
             position: relative;
-            width: 100%;
-            max-width: 900px;
-            height: 60vh;
-            max-height: 500px;
-            margin: auto;
-            border: 4px solid rgba(255, 255, 255, 0.7);
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            width: 100vw;
+            height: 100vh;
         }
         canvas {
             display: block;
             width: 100%;
             height: 100%;
             background-color: transparent;
-            border-radius: 16px;
         }
         #ui-container {
             position: absolute;
-            top: 15px;
+            top: 20px;
             left: 20px;
             right: 20px;
             display: flex;
@@ -104,26 +92,34 @@
             transform: translateY(-3px);
             box-shadow: 0 8px 20px rgba(249, 115, 22, 0.5);
         }
+        #footer-controls {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-wrapper">
-        <div id="game-container">
-            <canvas id="gameCanvas"></canvas>
-            <div id="ui-container">
-                <div id="score" class="score-box">Score: 0</div>
-                <div id="progress-bar-container">
-                    <div id="progress-bar"></div>
-                </div>
-            </div>
-            <div id="game-over-modal" class="hidden">
-                <h2 class="text-3xl font-bold">Chill out!</h2>
-                <p id="final-score" class="text-xl mt-2"></p>
-                <button id="restart-button" class="restart-button">Play Again!</button>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-container">
+            <div id="score" class="score-box">Score: 0</div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
             </div>
         </div>
-        <footer class="text-center mt-4 text-white font-semibold">
+        <div id="game-over-modal" class="hidden">
+            <h2 class="text-3xl font-bold">Chill out!</h2>
+            <p id="final-score" class="text-xl mt-2"></p>
+            <button id="restart-button" class="restart-button">Play Again!</button>
+        </div>
+        <footer id="footer-controls">
             <p>Tap/Space to Jump | Swipe/Arrow Down to Duck</p>
         </footer>
     </div>
@@ -140,21 +136,21 @@
         let jeep, groundY, obstacles, birds, clouds, palms, score, gameSpeed, gameOver, frame;
         let hills = [];
         let synth, musicLoop;
+        let nextObstacleDistance = 0;
 
         // --- Game Setup ---
         function init() {
-            canvas.width = document.getElementById('game-container').clientWidth;
-            canvas.height = document.getElementById('game-container').clientHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
             groundY = canvas.height * 0.85;
             
             jeep = {
                 x: 100,
                 y: groundY,
-                width: 70, // Hitbox width
-                height: 45, // Hitbox height
+                width: 70, 
+                height: 45,
                 vy: 0,
-                // **NEW** More fluid jump physics
                 gravity: 0.5,
                 jumpStrength: -13,
                 isJumping: false,
@@ -174,6 +170,7 @@
             gameSpeed = 5;
             gameOver = false;
             frame = 0;
+            nextObstacleDistance = 400; // Initial distance for the first obstacle
 
             scoreEl.textContent = `Score: 0`;
             progressBar.style.width = '0%';
@@ -197,7 +194,7 @@
             gameLoop();
         }
 
-        // --- **NEW** Sprite Drawing Functions ---
+        // --- Sprite Drawing Functions ---
         function drawJeep() {
             ctx.save();
             let yPos = jeep.y - jeep.height;
@@ -207,7 +204,6 @@
                 yPos += jeep.height - visualHeight;
             }
             
-            // Wheels
             ctx.fillStyle = '#334155';
             ctx.strokeStyle = '#4b5563';
             ctx.lineWidth = 2;
@@ -220,7 +216,6 @@
                 ctx.beginPath();
                 ctx.arc(0, 0, 12, 0, Math.PI * 2);
                 ctx.fill();
-                // Spokes
                 for (let i = 0; i < 4; i++) {
                     ctx.beginPath();
                     ctx.moveTo(-10, 0); ctx.lineTo(10, 0);
@@ -230,8 +225,7 @@
                 ctx.restore();
             });
 
-            // Jeep Body
-            ctx.fillStyle = '#f97316'; // Main body orange
+            ctx.fillStyle = '#f97316';
             ctx.beginPath();
             ctx.moveTo(jeep.x, yPos + visualHeight - 20);
             ctx.lineTo(jeep.x, yPos + 10);
@@ -242,11 +236,9 @@
             ctx.closePath();
             ctx.fill();
 
-            // Hood
-            ctx.fillStyle = '#fb923c'; // Lighter orange
+            ctx.fillStyle = '#fb923c';
             ctx.fillRect(jeep.x, yPos + visualHeight - 20, jeep.width, 10);
 
-            // Windshield & Cabin
             ctx.fillStyle = '#60a5fa';
             ctx.beginPath();
             ctx.moveTo(jeep.x + 35, yPos);
@@ -302,12 +294,10 @@
             
             ctx.save();
             ctx.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
-            // Body
             ctx.fillStyle = '#475569';
             ctx.beginPath();
             ctx.ellipse(0, 0, bird.width / 2, bird.height / 3, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Wings
             ctx.fillStyle = '#64748b';
             [-1, 1].forEach(side => {
                 ctx.beginPath();
@@ -323,14 +313,12 @@
             ctx.save();
             ctx.translate(palm.x, groundY);
             ctx.scale(palm.scale, palm.scale);
-            // Trunk
             ctx.fillStyle = '#854d0e';
             ctx.beginPath();
             ctx.moveTo(0, 0);
             ctx.quadraticCurveTo(20, -40, 5, -80);
             ctx.quadraticCurveTo(-10, -40, 0, 0);
             ctx.fill();
-            // Leaves
             ctx.fillStyle = '#16a34a';
             ctx.translate(5, -80);
             for (let i = 0; i < 6; i++) {
@@ -344,17 +332,17 @@
             ctx.restore();
         }
 
-        // --- Existing Functions (with minor changes) ---
+        // --- Creation and Update Functions ---
         function createHills() {
             let currentX = -50;
             while (currentX < canvas.width + 100) {
                 let hillWidth = Math.random() * 400 + 300;
                 let hillHeight = Math.random() * (canvas.height * 0.3) + (canvas.height * 0.1);
                 hills.push({ x: currentX, width: hillWidth, height: hillHeight, color: '#fbcfe8' });
-                hills.push({ x: currentX + Math.random() * 100, width: hillWidth, height: hillHeight * 0.7, color: '#f5d0fe' }); // Parallax hill
+                hills.push({ x: currentX + Math.random() * 100, width: hillWidth, height: hillHeight * 0.7, color: '#f5d0fe' });
                 currentX += hillWidth * 0.7;
             }
-            hills.sort((a,b) => a.height - b.height); // Draw smaller hills first
+            hills.sort((a,b) => a.height - b.height);
         }
         function drawHills() {
             hills.forEach((hill) => {
@@ -364,7 +352,6 @@
                 ctx.moveTo(hill.x, groundY);
                 ctx.quadraticCurveTo(hill.x + hill.width / 2, groundY - hill.height, hill.x + hill.width, groundY);
                 ctx.fill();
-
                 if (hill.x + hill.width < 0) {
                     let lastHill = hills[hills.length - 1];
                     hill.x = lastHill.x + lastHill.width * 0.7;
@@ -372,13 +359,20 @@
             });
         }
         function createObstacle() {
-            const type = ['rock', 'bush', 'log'][Math.floor(Math.random() * 3)];
-            let obs = { x: canvas.width + 100, type: type, scored: false };
-            if (type === 'rock') { obs.width = 35; obs.height = 35; }
-            else if (type === 'bush') { obs.width = 50; obs.height = 30; }
-            else { obs.width = 60; obs.height = 20; }
-            obs.y = groundY - obs.height;
-            obstacles.push(obs);
+            const type = Math.random() > 0.15 ? ['rock', 'bush', 'log'][Math.floor(Math.random() * 3)] : 'bird';
+            
+            if (type === 'bird') {
+                birds.push({ x: canvas.width + 50, y: groundY - 150 - Math.random() * 60, width: 40, height: 20, wingFlap: 0, wingDirection: 1, scored: false, type: 'bird' });
+            } else {
+                let obs = { x: canvas.width + 100, type: type, scored: false };
+                if (type === 'rock') { obs.width = 35; obs.height = 35; }
+                else if (type === 'bush') { obs.width = 50; obs.height = 30; }
+                else { obs.width = 60; obs.height = 20; }
+                obs.y = groundY - obs.height;
+                obstacles.push(obs);
+            }
+            // **NEW**: Set distance for the *next* obstacle to ensure fair spacing
+            nextObstacleDistance = (jeep.jumpStrength / -gravity) * gameSpeed * 0.8 + Math.random() * 200 + 300;
         }
         function drawObstacles() {
             obstacles.forEach(obs => {
@@ -387,12 +381,7 @@
                 else drawLog(obs);
             });
         }
-        function createBird() {
-            birds.push({ x: canvas.width + 50, y: groundY - 150 - Math.random() * 60, width: 40, height: 20, wingFlap: 0, wingDirection: 1, scored: false });
-        }
         function createCloud() { return { x: Math.random() * canvas.width, y: Math.random() * (canvas.height * 0.4), radius: Math.random() * 20 + 30 }; }
-        
-        // **FIX**: Added the missing createPalm function
         function createPalm() { return { x: Math.random() * canvas.width, scale: Math.random() * 0.5 + 0.5 }; }
 
         function drawClouds() {
@@ -408,7 +397,7 @@
             });
         }
         function drawPalms() {
-            palms.forEach((palm, index) => {
+            palms.forEach((palm) => {
                 palm.x -= gameSpeed * 0.5;
                 drawPalm(palm);
                 if (palm.x < -60) {
@@ -427,7 +416,6 @@
             drawHills();
             drawPalms();
             
-            // Update jeep
             if (jeep.isJumping) {
                 jeep.vy += jeep.gravity;
                 jeep.y += jeep.vy;
@@ -444,12 +432,13 @@
             jeep.wheelRotation += gameSpeed * 0.05;
             drawJeep();
             
-            // Update obstacles
-            frame++;
-            if (frame % Math.max(30, 120 - score / 5) === 0) createObstacle();
-            if (frame % 250 === 0) createBird();
+            // **NEW**: Distance-based obstacle spawning
+            let lastObstacle = [...obstacles, ...birds].sort((a,b) => b.x - a.x)[0];
+            if (!lastObstacle || lastObstacle.x < canvas.width - nextObstacleDistance) {
+                createObstacle();
+            }
             
-            [...obstacles, ...birds].forEach((obs, index) => {
+            [...obstacles, ...birds].forEach((obs) => {
                 obs.x -= (obs.type === 'bird' ? gameSpeed * 1.2 : gameSpeed);
                 if (obs.x + obs.width < 0) {
                     if(obs.type === 'bird') birds.splice(birds.indexOf(obs), 1);
@@ -471,7 +460,6 @@
         }
 
         function checkCollisions() {
-            // Use a slightly smaller hitbox than the visual sprite for fairness
             const jeepHitbox = {
                 x: jeep.x + 5,
                 width: jeep.width - 10,
@@ -522,7 +510,7 @@
         function handleDuck(isDucking) {
             if (!jeep.isJumping && !gameOver && isDucking) {
                 jeep.isDucking = true;
-                jeep.duckTimer = 40; // Duck duration in frames
+                jeep.duckTimer = 40;
             }
         }
 
