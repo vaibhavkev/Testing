@@ -137,6 +137,7 @@
         let hills = [];
         let synth, musicLoop;
         let nextObstacleDistance = 0;
+        let lastObstacleType = 'ground'; // **NEW**: Track last obstacle type
 
         // --- Game Setup ---
         function init() {
@@ -170,7 +171,8 @@
             gameSpeed = 5;
             gameOver = false;
             frame = 0;
-            nextObstacleDistance = 400; // Initial distance for the first obstacle
+            nextObstacleDistance = 400;
+            lastObstacleType = 'ground';
 
             scoreEl.textContent = `Score: 0`;
             progressBar.style.width = '0%';
@@ -189,7 +191,9 @@
                     noteIndex++;
                 }, "4n").start(0);
             }
-            Tone.Transport.start();
+            if (Tone.Transport.state !== 'started') {
+                 Tone.Transport.start();
+            }
 
             gameLoop();
         }
@@ -358,22 +362,24 @@
                 }
             });
         }
-        function createObstacle() {
-            const type = Math.random() > 0.15 ? ['rock', 'bush', 'log'][Math.floor(Math.random() * 3)] : 'bird';
-            
-            if (type === 'bird') {
-                birds.push({ x: canvas.width + 50, y: groundY - 150 - Math.random() * 60, width: 40, height: 20, wingFlap: 0, wingDirection: 1, scored: false, type: 'bird' });
-            } else {
-                let obs = { x: canvas.width + 100, type: type, scored: false };
-                if (type === 'rock') { obs.width = 35; obs.height = 35; }
-                else if (type === 'bush') { obs.width = 50; obs.height = 30; }
-                else { obs.width = 60; obs.height = 20; }
-                obs.y = groundY - obs.height;
-                obstacles.push(obs);
-            }
-            // **NEW**: Set distance for the *next* obstacle to ensure fair spacing
-            nextObstacleDistance = (jeep.jumpStrength / -gravity) * gameSpeed * 0.8 + Math.random() * 200 + 300;
+        
+        // **NEW** Refactored obstacle creation logic
+        function createGroundObstacle() {
+            const type = ['rock', 'bush', 'log'][Math.floor(Math.random() * 3)];
+            let obs = { x: canvas.width + 100, type: type, scored: false };
+            if (type === 'rock') { obs.width = 35; obs.height = 35; }
+            else if (type === 'bush') { obs.width = 50; obs.height = 30; }
+            else { obs.width = 60; obs.height = 20; }
+            obs.y = groundY - obs.height;
+            obstacles.push(obs);
+            lastObstacleType = 'ground';
         }
+
+        function createBirdObstacle() {
+            birds.push({ x: canvas.width + 50, y: groundY - 150 - Math.random() * 60, width: 40, height: 20, wingFlap: 0, wingDirection: 1, scored: false, type: 'bird' });
+            lastObstacleType = 'bird';
+        }
+
         function drawObstacles() {
             obstacles.forEach(obs => {
                 if (obs.type === 'rock') drawRock(obs);
@@ -429,13 +435,20 @@
                 jeep.duckTimer--;
                 if (jeep.duckTimer <= 0) jeep.isDucking = false;
             }
-            jeep.wheelRotation += gameSpeed * 0.05;
+            // **NEW** Increased wheel rotation speed
+            jeep.wheelRotation += gameSpeed * 0.1;
             drawJeep();
             
-            // **NEW**: Distance-based obstacle spawning
+            // **NEW** Improved distance-based obstacle spawning
             let lastObstacle = [...obstacles, ...birds].sort((a,b) => b.x - a.x)[0];
             if (!lastObstacle || lastObstacle.x < canvas.width - nextObstacleDistance) {
-                createObstacle();
+                // Logic to prevent impossible obstacles
+                if (lastObstacleType === 'bird' || Math.random() > 0.2) {
+                    createGroundObstacle();
+                } else {
+                    createBirdObstacle();
+                }
+                nextObstacleDistance = (jeep.jumpStrength / -jeep.gravity) * gameSpeed * 1.5 + Math.random() * 200 + 200;
             }
             
             [...obstacles, ...birds].forEach((obs) => {
