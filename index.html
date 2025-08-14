@@ -15,11 +15,7 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Hide the default scrollbar for the body and the horizontal container */
-        body::-webkit-scrollbar {
-            display: none;
-        }
-
+        /* Hide the default scrollbar for the horizontal container */
         .scroll-container::-webkit-scrollbar {
             display: none;
         }
@@ -30,7 +26,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white h-screen flex flex-col items-center justify-center p-4 overflow-hidden">
+<body class="bg-gray-900 text-white h-screen flex flex-col items-center justify-center overflow-hidden p-4">
 
     <!-- Main container for the arcade homepage -->
     <div class="w-full max-w-7xl flex flex-col items-center gap-8">
@@ -41,54 +37,56 @@
         </div>
 
         <!-- Horizontally scrolling container for game cards -->
-        <div class="scroll-container flex space-x-6 overflow-x-scroll p-4 md:p-8">
+        <!-- Added scroll-snap-type for a smooth, controlled scrolling experience -->
+        <div class="scroll-container flex space-x-6 overflow-x-scroll snap-x snap-mandatory px-4 md:px-8">
+            
             <!-- Mini-Game Placeholders -->
-            <!-- We'll create more than 3 to demonstrate the horizontal scrolling -->
+            <!-- Each card now has scroll-snap-align: start to snap to the beginning of the card -->
             
             <!-- Game Card 1 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🎮</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Space Invaders</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Blast aliens out of the sky!</p>
             </div>
             
             <!-- Game Card 2 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">👾</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Asteroid Escape</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Dodge rocks and survive!</p>
             </div>
             
             <!-- Game Card 3 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🏎️</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Retro Racer</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">A classic top-down racer!</p>
             </div>
             
             <!-- Game Card 4 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🧱</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Block Breaker</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Smash your way to victory!</p>
             </div>
             
             <!-- Game Card 5 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🚀</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Flappy Space</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Fly through the cosmos!</p>
             </div>
 
             <!-- Game Card 6 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🐍</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Space Snake</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Don't bite your own tail!</p>
             </div>
             
             <!-- Game Card 7 -->
-            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer">
+            <div class="flex-shrink-0 w-52 h-72 bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-700 flex flex-col items-center justify-center p-4 transform transition-transform duration-300 hover:scale-105 hover:shadow-2xl hover:border-blue-400 cursor-pointer snap-start">
                 <div class="w-32 h-32 bg-gray-700 rounded-full flex items-center justify-center text-5xl text-gray-500">🎯</div>
                 <h3 class="mt-4 text-xl font-semibold text-center text-teal-300">Aim Trainer</h3>
                 <p class="mt-1 text-sm text-gray-400 text-center">Test your aiming skills!</p>
